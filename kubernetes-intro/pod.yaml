@@ -24,24 +24,22 @@ spec:
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: nginx.conf
-      volumes:
-        - name: homework-volume
-          hostPath:
-            path: /homework
-        - name: nginx-conf
-          configMap:
-            name: nginx-conf
-  lifecycle:
-    preStop:
-      exec:
-        command: ["sh", "-c", "rm -f /homework/index.html"]
-  initContainers:
-    - name: box
-      image: busybox:latest
-      command: ['sh', '-c', 'cd /init && wget -O /init/index.html https://info.cern.ch']
-      volumeMounts:
-        - mountPath: /init
-          name: homework-volume
+      initContainers:
+      - name: box
+       image: busybox:latest
+       command: ['sh', '-c', 'cd /init && wget -O /init/index.html https://info.cern.ch']
+       volumeMounts:
+       - mountPath: /init
+         name: homework-volume
+      lifecycle:
+        preStop:
+          exec:
+            command: ["sh", "-c", "rm -f /homework/index.html"]
+  volumes:
+  - name: homework-volume
+  - name: nginx-conf
+    configMap:
+      name: nginx-conf
 ---
 apiVersion: v1
 kind: Service
