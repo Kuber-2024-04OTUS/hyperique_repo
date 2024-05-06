@@ -23,7 +23,7 @@ spec:
   initContainers:
   - name: box
     image: busybox:latest
-    command: ['sh', '-c', ' - cd /init && wget -O /init/index.html https://info.cern.ch']
+    command: ['/bin/sh', '-c', 'echo \<h1\>Hello World\</h1\> > /init/index.html']
     volumeMounts:
       - mountPath: /init
         name: homework-volume
