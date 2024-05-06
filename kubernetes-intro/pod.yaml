@@ -31,10 +31,10 @@ spec:
         volumeMounts:
         - name: homework-volume
           mountPath: /homework
-  volumes:
-  - name: homework-volume
-    hostPath:
-      path: /home/andrew/homework
+ volumes:
+ - name: homework-volume
+   hostPath:
+    path: /home/andrew/homework
 ---
 apiVersion: v1
 kind: Service
