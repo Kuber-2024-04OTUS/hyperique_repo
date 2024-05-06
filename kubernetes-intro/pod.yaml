@@ -26,11 +26,11 @@ spec:
               subPath: nginx.conf
       initContainers:
         - name: box
-        image: busybox:latest
-        command: ['sh', '-c', 'cd /init && wget -O /init/index.html https://info.cern.ch']
-        volumeMounts:
-        - mountPath: /init
-         name: homework-volume
+          image: busybox:latest
+          command: ['sh', '-c', 'cd /init && wget -O /init/index.html https://info.cern.ch']
+          volumeMounts:
+            - mountPath: /init
+              name: homework-volume
       lifecycle:
         preStop:
           exec:
