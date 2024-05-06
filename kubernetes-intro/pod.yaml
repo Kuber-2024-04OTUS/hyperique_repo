@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: homework-volume
+          mountPath: /homework
+      initContainers:
+      - name: install
+        image: busybox:1.28
+        command:
+        - wget
+        - "-O"
+        - "/homework/index.html"
+        - http://info.cern.ch
+        volumeMounts:
+        - name: homework-volume
+          mountPath: /homework
+  volumes:
+  - name: homework-volume
+    hostPath:
+      path: /home/andrew/homework
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webserver-svc
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: NodePort
