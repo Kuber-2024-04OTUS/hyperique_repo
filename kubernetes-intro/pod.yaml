@@ -14,34 +14,34 @@ spec:
         app: nginx
     spec:
       containers:
-      - name: nginx
-        image: nginx:latest
-        ports:
-        - containerPort: 8000
-        volumeMounts:
-        - name: homework-volume
-          mountPath: /homework
-        - name: nginx-conf
-          mountPath: /etc/nginx/conf.d/default.conf
-          subPath: nginx.conf
-      volumes:
-      - name: homework-volume
-        hostPath:
-          path: /homework
-      - name: nginx-conf
-        configMap:
-          name: nginx-conf
-      lifecycle:
-        preStop:
-          exec:
-            command: ["sh", "-c", "rm -f /homework/index.html"]
-      initContainers:
-        - name: box
-          image: busybox:latest
-          command: ['sh', '-c', 'cd /init && wget -O /init/index.html https://info.cern.ch']
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 8000
           volumeMounts:
-            - mountPath: /init
-              name: homework-volume
+            - name: homework-volume
+              mountPath: /homework
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: nginx.conf
+      volumes:
+        - name: homework-volume
+          hostPath:
+            path: /homework
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+  lifecycle:
+    preStop:
+      exec:
+        command: ["sh", "-c", "rm -f /homework/index.html"]
+  initContainers:
+    - name: box
+      image: busybox:latest
+      command: ['sh', '-c', 'cd /init && wget -O /init/index.html https://info.cern.ch']
+      volumeMounts:
+        - mountPath: /init
+          name: homework-volume
 ---
 apiVersion: v1
 kind: Service
@@ -56,10 +56,3 @@ spec:
       port: 80
       targetPort: 8000
   type: NodePort
-  volumes:
-    - name: nginx-conf
-      configMap:
-        name: nginx-conf
-    - name: homework-volume
-      emptyDir:
-        sizeLimit: 10Mi
