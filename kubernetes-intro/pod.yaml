@@ -32,18 +32,3 @@ spec:
     - name: nginx-conf
       configMap:
         name: nginx-conf
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: node-for-webserver
-  namespace: homework
-spec:
-  selector:
-    app: nginx
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8000
-  type: NodePort
