@@ -20,21 +20,10 @@ spec:
         volumeMounts:
         - name: homework-volume
           mountPath: /homework
-      initContainers:
-      - name: install
-        image: busybox:1.28
-        command:
-        - wget
-        - "-O"
-        - "/homework/index.html"
-        - http://info.cern.ch
-        volumeMounts:
-        - name: homework-volume
-          mountPath: /homework
- volumes:
- - name: homework-volume
-   hostPath:
-    path: /home/andrew/homework
+   volumes:
+   - name: homework-volume
+     hostPath:
+       path: /home/andrew/homework
 ---
 apiVersion: v1
 kind: Service
