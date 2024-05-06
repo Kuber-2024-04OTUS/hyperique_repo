@@ -23,10 +23,10 @@ spec:
     volumeMounts:
       - mountPath: /init
         name: homework-volume
-  lifecycle:
-    preStop:
-      exec:
-        command: ["/bin/sh", "-c", "rm -f /init/index.html"]
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "rm -f /init/index.html"]
   volumes:
     - name: homework-volume
     - name: nginx-conf
