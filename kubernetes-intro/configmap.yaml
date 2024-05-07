@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-conf
-#  namespace: homework
+  namespace: homework
 data:
   nginx.conf: |
     server {
