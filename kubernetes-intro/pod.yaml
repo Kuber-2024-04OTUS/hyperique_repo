@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: mywebsrv
-  namespace: homework
+#  namespace: homework
   labels:
       app: nginx
 spec:
