@@ -25,7 +25,7 @@ spec:
   initContainers:
   - name: box
     image: busybox:latest
-    command: ['/bin/sh', '-c', 'echo \test page\> > /init/index.html']
+    command: ['/bin/sh', '-c', 'echo <test page> > /init/index.html']
     volumeMounts:
       - mountPath: /init
         name: homework-volume
