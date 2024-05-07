@@ -4,11 +4,11 @@ kind: Pod
 metadata:
   name: mywebsrv
   namespace: homework
+  labels:
+      app: nginx
 spec:
   containers:
   - name: nginx
-    labels:
-      app: nginx
     image: nginx:latest
     ports:
       - containerPort: 8000
