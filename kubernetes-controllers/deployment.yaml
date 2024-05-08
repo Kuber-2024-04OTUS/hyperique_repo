@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mywebsrv-deployment
+  name:  
   namespace: homework
   labels:
     app: nginx
@@ -30,6 +30,11 @@ spec:
           preStop:
             exec:
               command: ["/bin/sh", "-c", "rm -f /init/index.html"]
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /homework/index.html
       initContainers:
       - name: box
         image: busybox:latest
