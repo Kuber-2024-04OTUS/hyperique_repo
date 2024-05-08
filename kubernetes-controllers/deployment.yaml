@@ -39,6 +39,8 @@ spec:
             command:
             - cat
             - /homework/index.html
+          initialDelaySeconds: 5
+          periodSeconds: 5
       initContainers:
       - name: box
         image: busybox:latest
