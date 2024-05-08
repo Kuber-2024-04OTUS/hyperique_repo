@@ -14,6 +14,8 @@ spec:
   selector:
     matchLabels:
       app: nginx
+  nodeSelector:
+    homework: "true"
   template:
     metadata:
       labels:
@@ -51,5 +53,3 @@ spec:
       - name: nginx-conf
         configMap:
           name: nginx-conf
-  nodeSelector:
-    homework: "true"
