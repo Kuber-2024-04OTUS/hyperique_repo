@@ -30,6 +30,13 @@ spec:
           preStop:
             exec:
               command: ["/bin/sh", "-c", "rm -f /init/index.html"]
+      initContainers:
+      - name: box
+        image: busybox:latest
+        command: ['/bin/sh', '-c', 'echo !test1 page! > /init/index.html']
+        volumeMounts:
+          - mountPath: /init
+            name: homework-volume
       volumes:
       - name: homework-volume
       - name: nginx-conf
