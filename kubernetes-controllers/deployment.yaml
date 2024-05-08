@@ -13,9 +13,7 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: nginx
-  nodeSelector:
-    homework: "true"
+      app: nginx 
   template:
     metadata:
       labels:
@@ -53,3 +51,5 @@ spec:
       - name: nginx-conf
         configMap:
           name: nginx-conf
+      nodeSelector:
+        homework: "true"
