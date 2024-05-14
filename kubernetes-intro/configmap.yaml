@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: homework
+data:
+  nginx.conf: |
+    server {
+        listen 8000;
+        root /homework;
+        server_name testpage.unitsky.com;
+        autoindex on;
+
+       }
