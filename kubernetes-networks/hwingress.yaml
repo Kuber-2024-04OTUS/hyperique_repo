@@ -14,13 +14,13 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: node-for-webserver
+                name: service-for-deployment
                 port:
                   number: 8090
           - path: /
             pathType: ImplementationSpecific
             backend:
               service:
-                name: node-for-webserver
+                name: service-for-deployment
                 port:
                   number: 8090
