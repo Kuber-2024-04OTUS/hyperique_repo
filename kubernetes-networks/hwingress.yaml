@@ -10,8 +10,8 @@ spec:
     - host: homework.otus
       http:
         paths:
-          - path: /index.html
-            pathType: Exact
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: service-for-deployment
