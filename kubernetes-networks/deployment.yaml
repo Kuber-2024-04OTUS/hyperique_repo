@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mywebsrv-deployment  
+  namespace: homework
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: nginx 
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: homework-volume
+          mountPath: /homework
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: nginx.conf
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "rm -f /homework/index.html"]
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /homework/index.html
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      initContainers:
+      - name: box
+        image: busybox:latest
+        command: ['/bin/sh', '-c', 'echo test deployment page with probe and nodeselector v4> /init/index.html']
+        volumeMounts:
+          - mountPath: /init
+            name: homework-volume
+      volumes:
+      - name: homework-volume
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+      nodeSelector:
+        homework: "true"
