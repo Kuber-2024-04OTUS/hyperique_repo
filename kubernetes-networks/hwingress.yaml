@@ -18,4 +18,3 @@ spec:
                 name: service-for-deployment
                 port:
                   number: 8090
-              path: /homepage
