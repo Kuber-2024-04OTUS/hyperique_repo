@@ -48,13 +48,6 @@ spec:
         volumeMounts:
           - mountPath: /init
             name: homework-volume
-      initContainers:
-      - name: box1
-        image: busybox:latest
-        command: ['/bin/sh', '-c', 'echo test deployment page with probe and nodeselector v4> /homework/homepage/index.html']
-        volumeMounts:
-          - mountPath: /homework/homepage
-            name: homework-volume
       volumes:
       - name: homework-volume
       - name: nginx-conf
