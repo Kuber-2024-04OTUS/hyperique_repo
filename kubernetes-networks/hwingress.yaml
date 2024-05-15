@@ -10,10 +10,17 @@ spec:
     - host: homework.otus
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: /index.html
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: service-for-deployment
+                name: node-for-webserver
+                port:
+                  number: 8090
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: node-for-webserver
                 port:
                   number: 8090
