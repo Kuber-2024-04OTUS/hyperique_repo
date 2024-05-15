@@ -44,7 +44,7 @@ spec:
       initContainers:
       - name: box
         image: busybox:latest
-        command: ['/bin/sh', '-c', 'echo test deployment page with probe and nodeselector v5> /init/index.html', '-c', 'echo test deployment page with probe and nodeselector v5> /init/index.html']
+        command: ['/bin/sh', '-c', 'echo test deployment page with probe and nodeselector v5> /init/index.html', '-c', 'echo test deployment page with probe and nodeselector v6> /init/homepage/index.html']
         volumeMounts:
           - mountPath: /init
             name: homework-volume
