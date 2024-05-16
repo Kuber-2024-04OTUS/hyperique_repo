@@ -12,3 +12,12 @@ data:
         autoindex on;
         port_in_redirect off;
        }
+    server {
+        listen 8000;
+        root /homework;
+        server_name homework.otus;
+        location / {
+            proxy_pass http://homework.otus/homepage;
+            proxy_redirect http://homework.otus/index.html;
+    }
+       }
