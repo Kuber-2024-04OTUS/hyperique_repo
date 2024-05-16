@@ -35,10 +35,10 @@ spec:
             exec:
               command: ["/bin/sh", "-c", "rm -f /homework/index.html"]
         readinessProbe:
-          exec:
-            command:
-            - cat
-            - /homework/index.html
+          httpGet:
+            path: /index.html
+            port: 8000
+            scheme: HTTP
           initialDelaySeconds: 5
           periodSeconds: 5
       initContainers:
