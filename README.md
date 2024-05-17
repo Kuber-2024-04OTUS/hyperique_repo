@@ -49,4 +49,9 @@
 
  ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e83bd217-e9aa-4870-bb07-2548fe325662)
 
+10. Написана аннотация в hwingress.yaml для возможности открытия приложения не по index.html. Проверим возможность открытия проекта по пути homework.otus/homepage
+    
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/4fb282f4-ca30-4c6a-b0f3-10413a3ba017)
+
+    
 
