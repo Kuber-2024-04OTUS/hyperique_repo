@@ -1,52 +1,52 @@
-# Репозиторий для выполнения ДЗ №3
-1. Клонируем репозиторий kubernetes-controllers в новую ветку kubernetes-networks
+# Репозиторий для выполнения ДЗ №4
+1. Клонируем репозиторий kubernetes-networks в новую ветку kubernetes-volumes
 
-2. Модифицируем deployment.yaml, создаем service.yaml и hwingress.yaml
+2. Модифицируем deployment.yaml, создаем cm.yaml, pvc.yaml
 
    
 3. Пулим новую ветку на сервер:
 
-   `git pull https://github.com/Kuber-2024-04OTUS/hyperique_repo.git kubernetes-networks`
+   `git pull https://github.com/Kuber-2024-04OTUS/hyperique_repo.git kubernetes-volumes`
 
 
-4. Поднимаем service для публикации приложения, используя соответствующий манифест и убеждаемся, что сервис поднялся:
+4. Применяем манифест pvc.yaml и убеждаемся в успешности binding:
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d96a9a88-08af-46c1-9891-8fcedfa54dbb)
 
 
-   `kubectl apply -f service.yaml`
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f13d56ba-3867-4992-b03b-d4cbcafbbf89)
-
-5. Разворачиваем ingress контроллер и убеждаемся, что он запущен:
-
-  ` minikube addons enable ingress `
+5. Применяем манифест cm.yaml и проверяем доступность нашего файла, примапленного как configmap
+ 
   
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e2be3f55-7b0b-4262-aaef-08ea6035f9c5)
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/43384947-7d16-4c09-9f06-1bdbe413d849)
+
 
    
-6. Применяем манифест ingress для нашего приложения:
+6. Создаем PersistentVolume pv.yaml c политикой retain и storageclassname: sc-for-deployment, убеждаемся в создании.
 
 
-   `kubectl apply -f hwingress.yaml`
+   `kubectl apply -f pv.yaml`
 
-7. Вносим изменения в /etc/hosts для адреса minikube
    
-   `192.168.49.2 homework.otus`
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/10635209-70fa-4781-a2ef-25baaf9f9825)
 
-8. Проверяем работоспособность приложения:
+   
 
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/7438c4cf-5a71-4afc-bc90-7f9f17516927)
+7. Создаем pvc-pb.yaml для PersistentVolumeClaim с использованием политик, запускаем, проверяем бинд.
+
+ `kubectl apply -f pvc-pb.yaml`
+
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/05277e8d-0c10-4bbc-89fa-7ca8075f5693)
+
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/db965551-4b47-4b0a-85e8-8980b4d1e3e2)
 
 
-9. Дополнительно проверим работоспособность readinessProbe, для этого удалим Index.html в одном из подов и посмотрим результат.
 
-`kubectl exec -it mywebsrv-deployment-6fcb44d67-dxbbz -n homework /bin/bash`
+8. Запускаем deployment уже с новой PersistentVolumeClaim, смотрим на работоспособность
+   
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/6c3a2e81-3c60-4281-a256-eb66475d4645)
 
- `rm /homework/index.html`
- 
- `exit`
- 
- В результате один из подов выключается из ротации:
+9. Посмотрим в наш примапленый каталог в ноде миникуба:
 
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e83bd217-e9aa-4870-bb07-2548fe325662)
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ba196b70-664a-4dd2-af15-6be56b95d633)
 
 
