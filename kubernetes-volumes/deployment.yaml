@@ -55,7 +55,7 @@ spec:
       volumes:
       - name: homework-volume
         persistentVolumeClaim:
-            claimName: pvc-for-deployment
+            claimName: pvc-for-deployment-policybased
       - name: nginx-conf
         configMap:
           name: nginx-conf
