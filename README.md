@@ -14,7 +14,7 @@
 ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d96a9a88-08af-46c1-9891-8fcedfa54dbb)
 
 
-5. Применяем манифест cm.yaml, переподнимаем deployment и проверяем доступность нашего файла, примапленного как configmap
+5. Применяем манифест cm.yaml и проверяем доступность нашего файла, примапленного как configmap
  
   
 ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/43384947-7d16-4c09-9f06-1bdbe413d849)
