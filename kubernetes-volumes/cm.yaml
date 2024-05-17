@@ -7,10 +7,10 @@ data:
   index2.html: |
     <html>
     <head>
-      <title>Тестовая страница</title>
+      <title>Test page for access configmap index</title>
      <!--<meta charset="UTF-8">-->
     </head>
     <body>
-      <h1>Тестовая страница</h1>
+      <h1>index2</h1>
     </body>
     </html>
