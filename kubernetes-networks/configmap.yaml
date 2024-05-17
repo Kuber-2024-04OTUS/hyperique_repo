@@ -9,11 +9,10 @@ data:
         listen 8000;
         server_name homework.otus;
         root /homework;
-        location = /index.html {
-            return 301 http://homework.otus/homepage;
+        location /homepage {
+          root /homework;
+          index index.html;
         }
+    }
 
-        location = /homepage {
-            alias /homework;    
-        }
-       }
+       
