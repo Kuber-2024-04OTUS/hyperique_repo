@@ -32,6 +32,8 @@ spec:
           subPath: nginx.conf
         - name: index-html
           mountPath: /homework/conf
+        - name: homepage
+          mountPath: /homework/homepage  
         lifecycle:
           preStop:
             exec:
@@ -60,5 +62,8 @@ spec:
       - name: index-html
         configMap:
           name: index-html
+      - name: homepage
+        configMap:
+          name: homepage
       nodeSelector:
         homework: "true"
