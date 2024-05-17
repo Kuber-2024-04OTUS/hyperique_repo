@@ -49,4 +49,7 @@
 
     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ba196b70-664a-4dd2-af15-6be56b95d633)
 
+   А так же доступность приложения:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/518ec839-4a25-4877-9712-8535637abdc2)
 
