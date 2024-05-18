@@ -1,81 +1,55 @@
-# Репозиторий для выполнения ДЗ №2 
-1. Клонируем репозиторий kubernetes-intro в новую ветку kubernetes-controllers
-   
-2. Пулим новую ветку на сервер:
+# Репозиторий для выполнения ДЗ №4
+1. Клонируем репозиторий kubernetes-networks в новую ветку kubernetes-volumes
 
-   `git pull https://github.com/Kuber-2024-04OTUS/hyperique_repo.git kubernetes-controllers`
+2. Модифицируем deployment.yaml, создаем cm.yaml, pvc.yaml
 
    
-3. Подготавливаем инфраструктуру к развертыванию deployment
-   
-   - Добавляем label homework=true к ноде кластера minikube
+3. Пулим новую ветку на сервер:
+
+   `git pull https://github.com/Kuber-2024-04OTUS/hyperique_repo.git kubernetes-volumes`
 
 
-   `kubectl label nodes minikube homework=true`
+4. Применяем манифест pvc.yaml и убеждаемся в успешности binding:
 
-     
-   - удаляем пространство имен "homework"
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d96a9a88-08af-46c1-9891-8fcedfa54dbb)
 
-   
-   `kubectl delete ns homework`
 
+5. Применяем манифест cm.yaml и проверяем доступность нашего файла, примапленного как configmap
  
-   - для выполнения задания используем манифест namespace.yaml из предыдущего задания.
+  
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/43384947-7d16-4c09-9f06-1bdbe413d849)
 
-     
-   `kubectl apply -f kubernetes-controllers/namespace.yaml`
-
-
-   - так же применяем ConfigMap для конфига nginx
-
-
-   `kubectl apply -f kubernetes-intro/configmap.yaml`
-
-
-5. Разворачиваем deployment и убеждаемся в работоспособности подов.
-
-
-   `kubectl apply -f kubernetes-controllers/deployment.yaml`
 
    
-  ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/9a0a51f3-ff98-49c6-b43b-daf464947f19)
-
-5. Поднимаем nodeport для публикации приложения, используя манифест из предыдущего задания:
+6. Создаем PersistentVolume pv.yaml c политикой retain и storageclassname: sc-for-deployment, убеждаемся в создании.
 
 
-   `kubectl apply -f kubernetes-intro/nodeport.yaml`
+   `kubectl apply -f pv.yaml`
 
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/4ff3d0aa-7854-4de3-aba2-6cf8c40bb4db)
-
-6. Применяем манифест ingress для нашего приложения:
-
-
-   `kubectl apply -f kubernetes-intro/ingress/testpageingress.yaml`
-
-
-7. Проверяем работоспособность приложения:
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/4c4275c4-916f-4f1c-b9b8-8d3b37f01a89)
-
-8. Дополнительно проверим работоспособность readinessProbe, для этого удалим Index.html в одном из подов и посмотрим результат.
-
-`kubectl exec -it mywebsrv-deployment-6fcb44d67-dxbbz -n homework /bin/bash`
-
- `rm /homework/index.html`
- 
- `exit`
- 
- В результате один из подов выключается из ротации:
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e83bd217-e9aa-4870-bb07-2548fe325662)
-
-9. Пересоберем приложение с новой версией.
-   Как мы видим поды переподнимаются, исключаясь из ротации по одному, в первую очередь удаляя тот, который уже выбыл из ротации.
    
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/3b19dd60-b4f3-42c5-ad60-955488a87cdb)
- 
-   На выходе имеем новую версию нашего приложения:
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/10635209-70fa-4781-a2ef-25baaf9f9825)
+
    
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/352bc9be-b77c-4f84-a267-f6a380003d5d)
+
+7. Создаем pvc-pb.yaml для PersistentVolumeClaim с использованием политик, запускаем, проверяем бинд.
+
+ `kubectl apply -f pvc-pb.yaml`
+
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/05277e8d-0c10-4bbc-89fa-7ca8075f5693)
+
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/db965551-4b47-4b0a-85e8-8980b4d1e3e2)
+
+
+
+8. Запускаем deployment уже с новой PersistentVolumeClaim, смотрим на работоспособность
+   
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/6c3a2e81-3c60-4281-a256-eb66475d4645)
+
+9. Посмотрим в наш примапленый каталог в ноде миникуба:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ba196b70-664a-4dd2-af15-6be56b95d633)
+
+   А так же доступность приложения:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/518ec839-4a25-4877-9712-8535637abdc2)
 

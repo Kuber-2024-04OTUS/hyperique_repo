@@ -7,8 +7,12 @@ data:
   nginx.conf: |
     server {
         listen 8000;
+        server_name homework.otus;
         root /homework;
-        server_name testpage.unitsky.com;
-        autoindex on;
-        port_in_redirect off;
-       }
+        location /homepage {
+          root /homework;
+          index index.html;
+        }
+    }
+
+       
