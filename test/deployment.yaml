@@ -48,14 +48,20 @@ spec:
       initContainers:
       - name: box
         image: busybox:latest
-        command: ['/bin/sh', '-c', 'echo hometask for deployment with persistent volumes!!!!> /init/index.html']
+       # command: ['/bin/sh', '-c', 'echo new homework> /init/index.html']
+        command: ['sh', '-c', 'cp -R /index/* /init/']
         volumeMounts:
           - mountPath: /init
             name: homework-volume
+          - mountPath: /index
+            name: index-volume
       volumes:
       - name: homework-volume
         persistentVolumeClaim:
             claimName: pvc-for-deployment-policybased
+      - name: index-volume
+        persistentVolumeClaim:
+            claimName: pvc-for-index
       - name: nginx-conf
         configMap:
           name: nginx-conf
