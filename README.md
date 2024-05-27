@@ -1,55 +1,44 @@
-# Репозиторий для выполнения ДЗ №4
-1. Клонируем репозиторий kubernetes-networks в новую ветку kubernetes-volumes
+# Репозиторий для выполнения ДЗ №5
+1. Клонируем репозиторий kubernetes-volumes в новую ветку kubernetes-security
 
-2. Модифицируем deployment.yaml, создаем cm.yaml, pvc.yaml
+2. Создаем манифест monitoring.yaml, в котором описываем service account monitoring, создаем роль для чтения endpoint metrics и RoleBinding для нашего аккаунта и применяем его.
 
+   `kubectl apply -f monitoring.yaml`
+
+3. Запускаем наш deployment с serviceaccount monitoring и убеждаемся, что все рабоатет.
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/defa86ed-3857-4655-b631-4c8b0293f937)
+
+
+4. Создаем манифест cd.yaml, в котором описываем аккаунт cd и даем ему роль admin,в рамках namespace homework. Роль admin предварительно описываем в этом же манифесте, давая ей полные права на все API-группы и ресурсы в рамках namespace homework. Применяем.
+
+   `kubectl apply -f cd.yaml`
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/9dcff4a4-0581-4683-bf0f-8bce7161f66b)
+
+
+5. Генерируем манифест cdtoken.yaml, в котором описываем создание токена со сроком жизни в сутки и применяем:
+
+    `kubectl apply -f cdtoken.yaml`
    
-3. Пулим новую ветку на сервер:
+  При необходимости мы можем вывести содержимое токена в файл:
 
-   `git pull https://github.com/Kuber-2024-04OTUS/hyperique_repo.git kubernetes-volumes`
-
-
-4. Применяем манифест pvc.yaml и убеждаемся в успешности binding:
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d96a9a88-08af-46c1-9891-8fcedfa54dbb)
-
-
-5. Применяем манифест cm.yaml и проверяем доступность нашего файла, примапленного как configmap
+    `kubectl get secret cd-token -n homework -o=jsonpath='{.data.token}' | base64 --decode > token.txt`     
  
-  
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/43384947-7d16-4c09-9f06-1bdbe413d849)
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f5c421de-c44c-450d-b22d-71a04ead7eec)
+
+ 
+6. Получаем kubeconfig файл для нашего service account CD, я делал это с помощью LENS
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f054ea5f-7bcb-4756-8201-7720daf3bcc1)
 
 
+
+7. В инстанс k8s был установлен компонент kube-state-metrics в ns kube-system и развернут service.
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/09911d7a-cb43-4428-93dd-9fba93573f6c)
    
-6. Создаем PersistentVolume pv.yaml c политикой retain и storageclassname: sc-for-deployment, убеждаемся в создании.
+Далее был изменен манфест deployment, в init контейнер была добавлена команда для скачивания эндпоинта /metrics из инстанса kube-state-metrics и помещения его по пути работы моего nginx.
+В результате после редеплоя , по адресу приложения/metrics.html получил нужный результат:
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/dce814c2-ffe1-4ae0-886f-9f0982f827ca)
 
-
-   `kubectl apply -f pv.yaml`
-
-   
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/10635209-70fa-4781-a2ef-25baaf9f9825)
-
-   
-
-7. Создаем pvc-pb.yaml для PersistentVolumeClaim с использованием политик, запускаем, проверяем бинд.
-
- `kubectl apply -f pvc-pb.yaml`
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/05277e8d-0c10-4bbc-89fa-7ca8075f5693)
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/db965551-4b47-4b0a-85e8-8980b4d1e3e2)
-
-
-
-8. Запускаем deployment уже с новой PersistentVolumeClaim, смотрим на работоспособность
-   
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/6c3a2e81-3c60-4281-a256-eb66475d4645)
-
-9. Посмотрим в наш примапленый каталог в ноде миникуба:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ba196b70-664a-4dd2-af15-6be56b95d633)
-
-   А так же доступность приложения:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/518ec839-4a25-4877-9712-8535637abdc2)
-
+ 
