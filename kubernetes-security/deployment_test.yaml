@@ -19,7 +19,6 @@ spec:
       labels:
         app: nginx
     spec:
-      serviceAccountName: monitoring
       containers:
       - name: nginx
         image: nginx:latest
@@ -38,7 +37,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["/bin/sh", "-c", "rm -f /homework/index.html &&  rm -f /homework/metrics.html"]
+              command: ["/bin/sh", "-c", "rm -R /homework/*"]
         readinessProbe:
           httpGet:
             path: /index.html
@@ -48,15 +47,21 @@ spec:
           periodSeconds: 5
       initContainers:
       - name: box
-        image: gcr.io/google-containers/busybox:1.27
-        command: ['/bin/sh', '-c', 'echo hometask for security RBAC> /init/index.html && wget -O /init/metrics.html "http://10.10.99.61:8080/metrics"']
+        image: busybox:latest
+       # command: ['/bin/sh', '-c', 'echo new homework> /init/index.html']
+        command: ['sh', '-c', 'cp -R /index/* /init/']
         volumeMounts:
           - mountPath: /init
             name: homework-volume
+          - mountPath: /index
+            name: index-volume
       volumes:
       - name: homework-volume
         persistentVolumeClaim:
             claimName: pvc-for-deployment-policybased
+      - name: index-volume
+        persistentVolumeClaim:
+            claimName: pvc-for-index
       - name: nginx-conf
         configMap:
           name: nginx-conf
