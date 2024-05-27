@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cd-token
+  namespace: homework
+  labels:
+    kubernetes.io/legacy-token-last-used: 2024-05-27
+    kubernetes.io/legacy-token-invalid-since: 2024-05-28
+  annotations:
+    kubernetes.io/service-account.name: cd
+type: kubernetes.io/service-account-token
