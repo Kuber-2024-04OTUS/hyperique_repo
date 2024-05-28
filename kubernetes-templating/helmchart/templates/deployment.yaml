@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-deployment  
+  namespace: {{ .Values.deployment.ns }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  replicas: {{ .Values.deployment.replicacount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      serviceAccountName: {{ .Values.spec.saname }}
+      containers:
+      - name: {{ .Values.name }}
+        image: {{ .Values.deployment.image }}:{{ .Values.deployment.version }}
+        ports:
+        - containerPort: {{ .Values.deployment.port }}
+        volumeMounts:
+        - name: {{ .Values.volumes.name }}
+          mountPath: /homework
+        - name: {{ .Values.name }}-nginxconf
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: nginx.conf
+        - name: index-html
+          mountPath: /homework/conf
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "rm -f /homework/index.html &&  rm -f /homework/metrics.html"]
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: {{ .Values.deployment.port }}
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      initContainers:
+      - name: box
+        image: gcr.io/google-containers/busybox:1.27
+        command: ['/bin/sh', '-c', 'echo hometask for HELM> /init/index.html && wget -O /init/metrics.html "http://10.10.99.61:8080/metrics"']
+        volumeMounts:
+          - mountPath: /init
+            name: {{ .Values.volumes.name }}
+      volumes:
+      - name: {{ .Values.volumes.name }}
+        persistentVolumeClaim:
+            claimName: {{ .Values.volumes.pvc }}
+      - name: {{ .Values.name }}-nginxconf
+        configMap:
+          name: {{ .Values.name }}-nginxconf
+      - name: index-html
+        configMap:
+          name: index-html
+      nodeSelector:
+        homework: "true"

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: index-html
-  namespace: homework
+  namespace: {{ .Values.deployment.ns }}
 data:
   index2.html: |
     <html>
