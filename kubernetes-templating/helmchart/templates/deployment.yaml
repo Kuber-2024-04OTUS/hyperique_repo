@@ -38,12 +38,14 @@ spec:
             exec:
               command: ["/bin/sh", "-c", "rm -f /homework/index.html &&  rm -f /homework/metrics.html"]
         readinessProbe:
+          {{- if .Values.probes.readiness }}
           httpGet:
             path: /index.html
             port: {{ .Values.deployment.port }}
             scheme: HTTP
           initialDelaySeconds: 5
           periodSeconds: 5
+          {{- end }}
       initContainers:
       - name: box
         image: gcr.io/google-containers/busybox:1.27

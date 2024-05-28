@@ -18,3 +18,5 @@ service:
   type: ClusterIP
 ingress:
   hostname: testpage.unitsky.com
+probes:
+  readiness: true
