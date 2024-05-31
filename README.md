@@ -41,15 +41,9 @@
 
 
 
-8. Запускаем deployment уже с новой PersistentVolumeClaim, смотрим на работоспособность
-   
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/6c3a2e81-3c60-4281-a256-eb66475d4645)
 
-9. Посмотрим в наш примапленый каталог в ноде миникуба:
+8 Написана аннотация в hwingress.yaml для возможности открытия приложения не по index.html. Проверим возможность открытия проекта по пути homework.otus/homepage
+    
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/4fb282f4-ca30-4c6a-b0f3-10413a3ba017)
 
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ba196b70-664a-4dd2-af15-6be56b95d633)
-
-   А так же доступность приложения:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/518ec839-4a25-4877-9712-8535637abdc2)
-
+    
