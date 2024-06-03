@@ -1,0 +1,21 @@
+controller:
+  replicaCount: 1
+  automountServiceAccountToken: true
+broker:
+  replicaCount: 1
+  persistence:
+    size: 1Gi
+  automountServiceAccountToken: true
+kraft:
+  enabled: true
+zookeeper:
+  enabled: false
+  persistence:
+    size: 1Gi
+listeners:
+  client:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT

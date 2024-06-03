@@ -1,0 +1,13 @@
+apiVersion: v2
+name: kafka-cluster
+description: Kafka dev chart
+type: application
+version: 0.1.1
+dependencies:
+  - name: kafka
+    condition: kafka.enabled
+    repository: https://charts.bitnami.com/bitnami
+    version: 29.2.0
+    - name: kafdrop
+    version: 0.1.1
+    condition: kafdrop.enabled
