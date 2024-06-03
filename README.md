@@ -1,49 +1,57 @@
-# Репозиторий для выполнения ДЗ №4
-1. Клонируем репозиторий kubernetes-networks в новую ветку kubernetes-volumes
+# Репозиторий для выполнения ДЗ №6
+   Клонируем репозиторий kubernetes-security в новую ветку kubernetes-templating
 
-2. Модифицируем deployment.yaml, создаем cm.yaml, pvc.yaml
-
+1. Для разделения наших заданий в ДЗ создадим два рабочих каталога - task1 и task2
    
-3. Пулим новую ветку на сервер:
+   Для первого задания создадим структуру нашего чарта. Каталоги charts и templates, а так же манифесты Chart.yaml и values.yaml.
 
-   `git pull https://github.com/Kuber-2024-04OTUS/hyperique_repo.git kubernetes-volumes`
-
-
-4. Применяем манифест pvc.yaml и убеждаемся в успешности binding:
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d96a9a88-08af-46c1-9891-8fcedfa54dbb)
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/08256924-d173-47c1-972b-7129ccc3fe8b)
 
 
-5. Применяем манифест cm.yaml и проверяем доступность нашего файла, примапленного как configmap
+   В каталоге templates размещаем все необходимые для запуска нашего приложения манифесты
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5747a905-088b-4e56-9768-c85633715f6f)
+
+   А в каталоге charts будут размещаться наши зависмости.
+
+   Изменяем deployment.yaml на взаимодействие с values, определяем значения переменных в values.yaml и запускаем наш deployment.
+
+`helm install hometask task1/`
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e8681146-18f4-471e-b043-13e16cee5f1b)
+
+   Наш deployment поднялся и работает
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/af483a9c-0ffb-4708-a83d-339ae8c6d949)
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5ded3164-0469-42ca-96c6-f0ff748a6e79)
+
+   Все условия, описанные в ДЗ - соблюдены.
+
  
+
+2. Для выполнения второй части задания перейдем в каталог task2.
+   - Создаем два каталога для наших окружений, dev и prod. Реализуем там values манифесты для каждого инстанса с необходимыми нам параметрами развертывания.
+   - В репозитории bitnami/kafka отсутствует чарт необходимой нам версии для развертывания kafka 3.5.2
+    
+      `helm search repo "bitnami/kafka" -l`
+     
+     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/741ad32a-9742-413b-a1d4-fb49f04d9160)
+
+     Поэтому будем использовать image из registry docker.io и опишем это в values-prod.yaml файле. Версию чарта будем использовать ближайшую к необходимой.
+
+   - Делаем helmfile манифест для поднятия наших окружений через helmfile.
   
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/43384947-7d16-4c09-9f06-1bdbe413d849)
+   - Запускаем поулчившийся deployment через helmfile:
 
+     `helmfile apply helmfile.yaml`
 
-   
-6. Создаем PersistentVolume pv.yaml c политикой retain и storageclassname: sc-for-deployment, убеждаемся в создании.
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5650583d-ab62-4ee0-aa99-e55b2743a9ae)
 
+     `helm list -A`
 
-   `kubectl apply -f pv.yaml`
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e8440cd5-7e47-4541-b633-116d7047047a)
 
-   
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/10635209-70fa-4781-a2ef-25baaf9f9825)
+   Наши приложения развернуты и функционируют с необходимыми нам параметрами, задача выполнена:
 
-   
-
-7. Создаем pvc-pb.yaml для PersistentVolumeClaim с использованием политик, запускаем, проверяем бинд.
-
- `kubectl apply -f pvc-pb.yaml`
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/05277e8d-0c10-4bbc-89fa-7ca8075f5693)
-
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/db965551-4b47-4b0a-85e8-8980b4d1e3e2)
-
-
-
-
-8 Написана аннотация в hwingress.yaml для возможности открытия приложения не по index.html. Проверим возможность открытия проекта по пути homework.otus/homepage
-    
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/4fb282f4-ca30-4c6a-b0f3-10413a3ba017)
-
-    
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/0999326f-ae55-4a87-9daa-1031d4d93fd0)
