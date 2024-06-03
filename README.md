@@ -1,44 +1,66 @@
-# Репозиторий для выполнения ДЗ №5
-1. Клонируем репозиторий kubernetes-volumes в новую ветку kubernetes-security
+# Репозиторий для выполнения ДЗ №6
+   Клонируем репозиторий kubernetes-security в новую ветку kubernetes-templating
 
-2. Создаем манифест monitoring.yaml, в котором описываем service account monitoring, создаем роль для чтения endpoint metrics и RoleBinding для нашего аккаунта и применяем его.
-
-   `kubectl apply -f monitoring.yaml`
-
-3. Запускаем наш deployment с serviceaccount monitoring и убеждаемся, что все рабоатет.
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/defa86ed-3857-4655-b631-4c8b0293f937)
-
-
-4. Создаем манифест cd.yaml, в котором описываем аккаунт cd и даем ему роль admin,в рамках namespace homework. Роль admin предварительно описываем в этом же манифесте, давая ей полные права на все API-группы и ресурсы в рамках namespace homework. Применяем.
-
-   `kubectl apply -f cd.yaml`
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/9dcff4a4-0581-4683-bf0f-8bce7161f66b)
-
-
-5. Генерируем манифест cdtoken.yaml, в котором описываем создание токена со сроком жизни в сутки и применяем:
-
-    `kubectl apply -f cdtoken.yaml`
+1. Для разделения наших заданий в ДЗ создадим два рабочих каталога - task1 и task2
    
-  При необходимости мы можем вывести содержимое токена в файл:
+   Для первого задания создадим структуру нашего чарта. Каталоги charts и templates, а так же манифесты Chart.yaml и values.yaml.
 
-    `kubectl get secret cd-token -n homework -o=jsonpath='{.data.token}' | base64 --decode > token.txt`     
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/08256924-d173-47c1-972b-7129ccc3fe8b)
+
+
+   В каталоге templates размещаем все необходимые для запуска нашего приложения манифесты
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5747a905-088b-4e56-9768-c85633715f6f)
+
+   А в каталоге charts будут размещаться наши зависмости.
+
+   Изменяем deployment.yaml на взаимодействие с values, определяем значения переменных в values.yaml и запускаем наш deployment.
+
+`helm install hometask task1/`
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e8681146-18f4-471e-b043-13e16cee5f1b)
+
+   Наш deployment поднялся и работает
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/af483a9c-0ffb-4708-a83d-339ae8c6d949)
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5ded3164-0469-42ca-96c6-f0ff748a6e79)
+
+   Все условия, описанные в ДЗ - соблюдены.
+
  
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f5c421de-c44c-450d-b22d-71a04ead7eec)
 
- 
-6. Получаем kubeconfig файл для нашего service account CD, я делал это с помощью LENS
+2. Для выполнения второй части задания перейдем в каталог task2.
+   - Создаем два каталога для наших окружений, dev и prod. Реализуем там values манифесты для каждого инстанса с необходимыми нам параметрами развертывания.
+   - В репозитории bitnami/kafka отсутствует чарт необходимой нам версии для развертывания kafka 3.5.2
+    
+      `helm search repo "bitnami/kafka" -l`
+     
+     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/741ad32a-9742-413b-a1d4-fb49f04d9160)
 
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f054ea5f-7bcb-4756-8201-7720daf3bcc1)
+     Поэтому будем использовать image из registry docker.io и опишем это в values-prod.yaml файле. Версию чарта будем использовать ближайшую к необходимой.
 
+   - Делаем helmfile манифест для поднятия наших окружений через helmfile.
+  
+   - Запускаем поулчившийся deployment через helmfile:
 
+     `helmfile apply helmfile.yaml`
 
-7. В инстанс k8s был установлен компонент kube-state-metrics в ns kube-system и развернут service.
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/09911d7a-cb43-4428-93dd-9fba93573f6c)
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5650583d-ab62-4ee0-aa99-e55b2743a9ae)
+
+     `helm list -A`
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e8440cd5-7e47-4541-b633-116d7047047a)
+
+   Наши приложения развернуты и функционируют с необходимыми нам параметрами, задача выполнена:
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/0999326f-ae55-4a87-9daa-1031d4d93fd0)
+
    
-Далее был изменен манфест deployment, в init контейнер была добавлена команда для скачивания эндпоинта /metrics из инстанса kube-state-metrics и помещения его по пути работы моего nginx.
-В результате после редеплоя , по адресу приложения/metrics.html получил нужный результат:
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/dce814c2-ffe1-4ae0-886f-9f0982f827ca)
 
- 
+   
+   
+     
+
+   
+
