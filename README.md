@@ -1,3 +1,4 @@
+
 # Репозиторий для выполнения ДЗ №8
 1. Клонируем репозиторий kubernetes-volumes в новую ветку kubernetes-monitoring
    
@@ -7,7 +8,7 @@
    
 ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/3645817f-7097-4e2a-8145-549b4e2173be)
 
-   Убеждаемся, что nginx отдает метрики по указанному в config пути.
+3. Убеждаемся, что nginx отдает метрики по указанному в config пути.
 
 ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/254db606-8612-40dd-9242-d3df9436a2ff)
 
@@ -48,5 +49,3 @@
 
 ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/c92653c3-adfb-4f2c-9978-62aeaeb18454)
 
-
- 
