@@ -49,7 +49,7 @@ spec:
       initContainers:
       - name: box
         image: gcr.io/google-containers/busybox:1.27
-        command: ['/bin/sh', '-c', 'echo hometask for HELM> /init/index.html && wget -O /init/metrics.html "http://10.10.99.61:8080/metrics"']
+        command: ['/bin/sh', '-c', 'echo hometask for MONITORING> /init/index.html && wget -O /init/metrics.html "http://10.10.99.61:8080/metrics"']
         volumeMounts:
           - mountPath: /init
             name: {{ .Values.volumes.name }}
