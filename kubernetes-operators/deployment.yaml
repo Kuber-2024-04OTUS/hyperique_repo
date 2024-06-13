@@ -1,0 +1,10 @@
+apiVersion: otus.homework/v1
+kind: MySQL
+metadata:
+  name: my-mysql  
+spec:
+  image: mysql:8.0
+  database: mydatabase
+  password: super-secret-password
+  storage_size: 1Gi
+  port: 3307
