@@ -1,3 +1,4 @@
+
 # Репозиторий для выполнения ДЗ №7
 
 1. Клонируем репозиторий kubernetes-monitoring в новую ветку kubernetes-operators
@@ -37,6 +38,7 @@
  - 
    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5f2f6b8f-e5dc-452a-abc1-4365f41e56e7)
  
+
 6. Проверяем удаление объекта:
    
    `kubectl delete mysqls.otus.homework my-mysql`
@@ -46,6 +48,8 @@
    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/9e10290f-852e-4fab-bc4f-7936c02d7ad0)
 
 
+
+ 
 Доп задание:
 
   В манифест cr.yaml были внесены изменения для прав ClusterRole с минимально возможными правами для запуска и работы оператора без ошибок.
