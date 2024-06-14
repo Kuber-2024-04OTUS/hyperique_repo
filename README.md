@@ -1,57 +1,56 @@
-# Репозиторий для выполнения ДЗ №6
-   Клонируем репозиторий kubernetes-security в новую ветку kubernetes-templating
 
-1. Для разделения наших заданий в ДЗ создадим два рабочих каталога - task1 и task2
+# Репозиторий для выполнения ДЗ №7
+
+1. Клонируем репозиторий kubernetes-monitoring в новую ветку kubernetes-operators
+
+2. Создаем манифест myCRD.yaml, в котором описываем параметры согласно домашнему заданию.
+
+   `kubectl apply -f myCRD.yaml`
    
-   Для первого задания создадим структуру нашего чарта. Каталоги charts и templates, а так же манифесты Chart.yaml и values.yaml.
+3. Создаем service account, clusterrole, clusterrolebinding для нашего CRD.
 
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/08256924-d173-47c1-972b-7129ccc3fe8b)
+   `kubectl apply -f sa.yaml && kubectl apply -f crb.yaml && kubectl apply -f cr.yaml`
+
+4. Создаем манифест для развертывания оператора.
+
+   `kubectl apply -f mysqloperator.yaml`
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/2d5e08e4-2e55-4018-accc-faa67dad2f19)
 
 
-   В каталоге templates размещаем все необходимые для запуска нашего приложения манифесты
+5. Создаем манифест deployment.yaml для развертывания кастомного объекта kind: MySQL и применяем.
 
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5747a905-088b-4e56-9768-c85633715f6f)
+   `kubectl apply -f deployment.yaml`
 
-   А в каталоге charts будут размещаться наши зависмости.
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e2c5f642-5106-4d28-a9b1-13226b8da93a)
 
-   Изменяем deployment.yaml на взаимодействие с values, определяем значения переменных в values.yaml и запускаем наш deployment.
+Как видим наш deployment с указанным образом mysql поднялся, создал нужные ресурсы и успешно функционирует.
+ 
+ - service:
+   
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d7805fcb-7e65-44cc-95b7-2381ee1ed4a0)
 
-`helm install hometask task1/`
+ - pv:
+   
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ede4d951-c178-4202-9c0d-8540c0eef4eb)
 
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e8681146-18f4-471e-b043-13e16cee5f1b)
-
-   Наш deployment поднялся и работает
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/af483a9c-0ffb-4708-a83d-339ae8c6d949)
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5ded3164-0469-42ca-96c6-f0ff748a6e79)
-
-   Все условия, описанные в ДЗ - соблюдены.
-
+ - pvc:
+ - 
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5f2f6b8f-e5dc-452a-abc1-4365f41e56e7)
  
 
-2. Для выполнения второй части задания перейдем в каталог task2.
-   - Создаем два каталога для наших окружений, dev и prod. Реализуем там values манифесты для каждого инстанса с необходимыми нам параметрами развертывания.
-   - В репозитории bitnami/kafka отсутствует чарт необходимой нам версии для развертывания kafka 3.5.2
-    
-      `helm search repo "bitnami/kafka" -l`
-     
-     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/741ad32a-9742-413b-a1d4-fb49f04d9160)
+6. Проверяем удаление объекта:
+   
+   `kubectl delete mysqls.otus.homework my-mysql`
 
-     Поэтому будем использовать image из registry docker.io и опишем это в values-prod.yaml файле. Версию чарта будем использовать ближайшую к необходимой.
+   По логам оператора видим, что удаление прошло успешно, все объекты созданные оператором удалены.
 
-   - Делаем helmfile манифест для поднятия наших окружений через helmfile.
-  
-   - Запускаем поулчившийся deployment через helmfile:
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/9e10290f-852e-4fab-bc4f-7936c02d7ad0)
 
-     `helmfile apply helmfile.yaml`
 
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5650583d-ab62-4ee0-aa99-e55b2743a9ae)
 
-     `helm list -A`
+ 
+Доп задание:
 
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e8440cd5-7e47-4541-b633-116d7047047a)
-
-   Наши приложения развернуты и функционируют с необходимыми нам параметрами, задача выполнена:
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/0999326f-ae55-4a87-9daa-1031d4d93fd0)
+  В манифест cr.yaml были внесены изменения для прав ClusterRole с минимально возможными правами для запуска и работы оператора без ошибок.
+ 
