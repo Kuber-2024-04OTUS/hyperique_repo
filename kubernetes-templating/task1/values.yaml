@@ -4,7 +4,7 @@ deployment:
   image: nginx
   version: latest
   port: 8000
-  ns: homework
+  ns: myapp
 spec:
   saname: monitoring
 volumes:
@@ -17,6 +17,6 @@ service:
   port: 8090
   type: ClusterIP
 ingress:
-  hostname: testpage.unitsky.com
+  hostname: ustinovich.online
 probes:
   readiness: true
