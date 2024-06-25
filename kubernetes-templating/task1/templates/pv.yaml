@@ -9,5 +9,3 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.volumes.sc }}
-  hostPath:
-    path: /andrew/home/data

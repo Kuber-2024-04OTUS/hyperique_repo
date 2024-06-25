@@ -10,7 +10,7 @@ spec:
 volumes:
   pvc: andrew-app-pvc
   pv: andrew-app-pv
-  sc: andrew-app-sc
+  sc: yc-network-hdd
   name: homework-volume
 service:
   name: andrew
