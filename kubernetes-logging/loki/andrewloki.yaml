@@ -39,10 +39,12 @@ loki:
       accessKeyId: "${GRAFANA-LOKI-S3-ACCESSKEYID}"
       secretAccessKey: "${GRAFANA-LOKI-S3-SECRETACCESSKEY}"
     bucketNames:
-      chunks: test
+      chunks: chunks
+      admin: admin
+      rules: ruler
     type: s3
     s3:
-      s3: test
+      s3: chunks
       endpoint: 'minio1.unitsky.com'
       region: by_minsk
       secretAccessKey: wXDOhXqRi6vYyDNSPhE1Ez4yqKRpoqvESmzltJ98
