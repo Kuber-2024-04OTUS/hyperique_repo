@@ -7,7 +7,7 @@ data:
   nginx.conf: |
     server {
         listen 8000;
-        server_name homework.otus;
+        server_name test.ustinovich.online;
         root /homework;
         location /homepage {
           root /homework;
