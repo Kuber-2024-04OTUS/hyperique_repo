@@ -5,7 +5,9 @@ metadata:
   namespace: homework
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
+    ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
     - host: test.ustinovich.online
       http:
