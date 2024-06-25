@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apphelm
+spec:
+  destination:
+    name: ''
+    namespace: homeworkhelm
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: kubernetes-templating/task1
+    repoURL: 'git@github.com:Kuber-2024-04OTUS/hyperique_repo.git'
+    targetRevision: kubernetes-templating
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: ingress.hostname
+          value: test.ustinovich.online
+        - name: deployment.ns
+          value: homeworkhelm
+  sources: []
+  project: otus
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

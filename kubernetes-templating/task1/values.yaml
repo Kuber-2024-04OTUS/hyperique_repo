@@ -9,7 +9,7 @@ spec:
   saname: monitoring
 volumes:
   pvc: andrew-app-pvc
-  pv: andrew-app-pv
+  #pv: andrew-app-pv
   sc: yc-network-hdd
   name: homework-volume
 service:

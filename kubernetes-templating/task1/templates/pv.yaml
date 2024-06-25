@@ -9,3 +9,4 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.volumes.sc }}
+  
