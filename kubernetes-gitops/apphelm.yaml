@@ -19,6 +19,8 @@ spec:
           value: test.ustinovich.online
         - name: deployment.ns
           value: homeworkhelm
+        - name: deployment.replicacount
+          value: '4'
   sources: []
   project: otus
   syncPolicy:
