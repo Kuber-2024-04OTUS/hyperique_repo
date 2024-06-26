@@ -3,4 +3,4 @@ kind: StorageClass
 metadata:
   name: {{ .Values.volumes.sc }}
 provisioner: disk-csi-driver.mks.ycloud.io
-reclaimPolicy: Retain
+reclaimPolicy: Delete
