@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.name }}-ingress
   namespace: {{ .Values.deployment.ns }}
   annotations:
-    #kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "andrew-clusterissuer"
     #nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
