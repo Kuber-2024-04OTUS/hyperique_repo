@@ -1,0 +1,128 @@
+global:  
+  extraArgs:
+    - '-config.expand-env=true'
+  envFrom:
+    - secretRef:
+        name: loki-secrets
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+  dnsService: "kube-dns" 
+  dnsNamespace: "kube-system"
+deploymentMode: SingleBinary
+loki:
+  extraArgs:
+    - '-config.expand-env=true'
+  envFrom:
+    - secretRef:
+        name: loki-secrets
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    config: 
+      extraArgs:
+        - '-config.expand-env=true'
+      envFrom:
+        - secretRef:
+          name: loki-secrets
+      endpoint: "minio1.unitsky.com"
+      accessKeyId: "${GRAFANA-LOKI-S3-ACCESSKEYID}"
+      secretAccessKey: "${GRAFANA-LOKI-S3-SECRETACCESSKEY}"
+    bucketNames:
+      chunks: chunks
+      admin: admin
+      rules: ruler
+    type: s3
+    s3:
+      s3: chunks
+      endpoint: 'minio1.unitsky.com'
+      region: by_minsk
+      secretAccessKey: wXDOhXqRi6vYyDNSPhE1Ez4yqKRpoqvESmzltJ98
+      accessKeyId: HV4n9Lkqn1ZxjRLeArGN
+     # accessKeyId: "${GRAFANA-LOKI-S3-ACCESSKEYID}"
+     # secretAccessKey: "${GRAFANA-LOKI-S3-SECRETACCESSKEY}"
+      s3ForcePathStyle: true
+      tls_verify: true  
+  schemaConfig:
+    configs:
+    - from: "2024-01-01"
+      store: tsdb
+      index:
+        prefix: loki_index_
+        period: 24h
+      object_store: s3
+      schema: v13
+resultsCache:
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+backend:
+  replicas: 0
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+  extraArgs:
+    - '-config.expand-env=true'
+  extraEnvFrom:
+    - secretRef:
+        name: loki-secrets
+singleBinary:
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+  replicas: 1 
+read:
+  replicas: 0
+  extraArgs:
+    - '-config.expand-env=true'
+  extraEnvFrom:
+    - secretRef:
+        name: loki-secrets 
+write:
+  replicas: 0
+  extraArgs:
+    - '-config.expand-env=true'
+  extraEnvFrom:
+    - secretRef:
+        name: loki-secrets   
+chunksCache:
+  allocatedMemory: 128
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+gateway:
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists
+lokiCanary:
+  nodeSelector:
+    node-role.kubernetes.io/infra: infra
+  tolerations:
+    - effect: NoSchedule
+      key: infra
+      operator: Exists

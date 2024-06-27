@@ -1,0 +1,22 @@
+name: andrew
+deployment:
+  replicacount: 3
+  image: nginx
+  version: latest
+  port: 8000
+  ns: homework
+spec:
+  saname: monitoring
+volumes:
+  pvc: andrew-app-pvc
+  pv: andrew-app-pv
+  sc: andrew-app-sc
+  name: homework-volume
+service:
+  name: andrew
+  port: 8090
+  type: ClusterIP
+ingress:
+  hostname: testpage.unitsky.com
+probes:
+  readiness: true

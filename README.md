@@ -1,56 +1,75 @@
 
-# Репозиторий для выполнения ДЗ №7
 
-1. Клонируем репозиторий kubernetes-monitoring в новую ветку kubernetes-operators
+# Репозиторий для выполнения ДЗ №9
+1. Клонируем репозиторий kubernetes-monitoring в новую ветку kubernetes-logging
 
-2. Создаем манифест myCRD.yaml, в котором описываем параметры согласно домашнему заданию.
+2. Применяем лейбл и taint для ноды, которую будем использовать в качестве инфраструктурной:
 
-   `kubectl apply -f myCRD.yaml`
+   `kubectl label node cl190vqqqoksldfc3u8c-alif node-role.kubernetes.io/infra=infra`
+
+   `kubectl taint nodes cl190vqqqoksldfc3u8c-alif infra=true:NoSchedule`
+
+   `kubectl get node -o wide --show-labels` :
+
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e1374d55-0d26-48d9-8871-b8f6767d4790)
+
+   `kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints`
    
-3. Создаем service account, clusterrole, clusterrolebinding для нашего CRD.
+![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f87ee5b0-86ec-41d3-9842-c05d27969096)
 
-   `kubectl apply -f sa.yaml && kubectl apply -f crb.yaml && kubectl apply -f cr.yaml`
+3. Немного отойдем от условий ДЗ и для экономии ресурсов будем использовать не яндекс S3 бакет, а инстанс S3 minio, который развернем на кластере, который использовали для выполнения предыдущих ДЗ.
 
-4. Создаем манифест для развертывания оператора.
+   - Через minio operator развернем tennant и создадим бакеты для loki:
+     
+     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e2d66468-0150-4eff-a671-dd464b0113bb)
 
-   `kubectl apply -f mysqloperator.yaml`
+   - Создадим access key и access key id для доступа к бакетам:
+  
+     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/fe6551c2-cc29-4e64-91b5-9628bfc45f1c)
 
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/2d5e08e4-2e55-4018-accc-faa67dad2f19)
+ 4. Далее запулим чарт с локи и создадим кастомный values:
+
+    `helm pull grafana/loki`
+
+    В качестве схемы развертывания будем использовать монолитную, Single Binary. Устанавливаем:
+
+    `helm install loki --namespace=logging --values=loki/andrewloki.yaml loki/`
+
+    Убеждаемся, что наш инстанс развернулся и залетел только на ифнраструктурную ноду:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5e675954-ca67-436c-820d-616ce47a5d85)
 
 
-5. Создаем манифест deployment.yaml для развертывания кастомного объекта kind: MySQL и применяем.
-
-   `kubectl apply -f deployment.yaml`
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e2c5f642-5106-4d28-a9b1-13226b8da93a)
-
-Как видим наш deployment с указанным образом mysql поднялся, создал нужные ресурсы и успешно функционирует.
- 
- - service:
+5. Пулим чарт промтейла grafana/promtail, настраиваем values для размещения на обоих нодах и устанавливаем:
    
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d7805fcb-7e65-44cc-95b7-2381ee1ed4a0)
+    `helm install promtail --namespace=logging --values=values.yaml promtail/`
 
- - pv:
+  Убеждаемся, что promtail залетел на обе ноды:
+
+  ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/a15bf206-4167-4a28-9d8f-b376920b1be4)
+
+6. Создаем кастомный values.yaml для графаны и ставим из helm чарта вместе с prometheus stack:
+
+   `helm install grafana --namespace=logging --values=grafana/values.yaml prometheus-community/kube-prometheus-stack`
+
+   Убеждаемся, что все залетело на infra ноду:
    
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/ede4d951-c178-4202-9c0d-8540c0eef4eb)
-
- - pvc:
- - 
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5f2f6b8f-e5dc-452a-abc1-4365f41e56e7)
- 
-
-6. Проверяем удаление объекта:
-   
-   `kubectl delete mysqls.otus.homework my-mysql`
-
-   По логам оператора видим, что удаление прошло успешно, все объекты созданные оператором удалены.
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/9e10290f-852e-4fab-bc4f-7936c02d7ad0)
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/94d4eb1e-8ab1-4db9-bf9d-9b45e5bfd91f)
 
 
+7. Авторизируемся в графану и добавляем loki gateway:
 
- 
-Доп задание:
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/1f8aca9d-1212-473e-89f9-ffe8100273fd)
 
-  В манифест cr.yaml были внесены изменения для прав ClusterRole с минимально возможными правами для запуска и работы оператора без ошибок.
- 
+8. Убеждаемся, что loki как data source работает и отдает метрики кластера, которые ему предоставил promtail.
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/6918d0ab-58eb-4c7a-bd9d-271d0920a43d)
+
+9. Так же убеждаемся, что Loki успешно подключился к нашему S3 хранилищу.
+    
+ ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/26454fbc-6a8d-4743-913b-0575c939dcf5)
+
+
+
+
+

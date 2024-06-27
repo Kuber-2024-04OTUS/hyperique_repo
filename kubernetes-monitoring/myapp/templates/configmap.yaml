@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-nginxconf
+  namespace: {{ .Values.deployment.ns }}
+data:
+  nginx.conf: |
+    server {
+        listen 8000;
+        server_name testpage.unitsky.com;
+        root /homework;
+        location /homepage {
+          root /homework;
+          index index.html;
+          }
+        location /status {
+        stub_status;
+           }
+    }
