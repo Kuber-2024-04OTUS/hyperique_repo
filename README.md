@@ -1,5 +1,4 @@
 
-
 # Репозиторий для выполнения ДЗ №10
 1. Клонируем репозиторий kubernetes-logging в новую ветку kubernetes-gitops
 
@@ -79,5 +78,8 @@
    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e76952da-15cf-47c4-bba1-bd157cb93455)
 
    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d37c126d-466b-4570-b74a-08e534528424)
+
+
+
 
 
