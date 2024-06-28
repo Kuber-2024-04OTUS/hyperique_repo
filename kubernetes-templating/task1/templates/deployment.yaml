@@ -64,4 +64,4 @@ spec:
         configMap:
           name: index-html
       nodeSelector:
-        homework: "true"
+        node-role.kubernetes.io/infra: infra
