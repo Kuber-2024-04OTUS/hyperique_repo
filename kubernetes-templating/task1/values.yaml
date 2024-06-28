@@ -20,3 +20,5 @@ ingress:
   hostname: testpage.unitsky.com
 probes:
   readiness: true
+provisioner:
+  name: cluster.local/nfs-subdir-external-provisioner
