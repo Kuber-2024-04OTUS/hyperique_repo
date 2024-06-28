@@ -64,4 +64,4 @@ spec:
         configMap:
           name: index-html
       nodeSelector:
-        node-role.kubernetes.io/infra: infra
+        node-role.kubernetes.io/allsites: true
