@@ -1,73 +1,83 @@
 
+# Репозиторий для выполнения ДЗ №10
+1. Клонируем репозиторий kubernetes-logging в новую ветку kubernetes-gitops
 
-# Репозиторий для выполнения ДЗ №9
-1. Клонируем репозиторий kubernetes-monitoring в новую ветку kubernetes-logging
-
-2. Применяем лейбл и taint для ноды, которую будем использовать в качестве инфраструктурной:
-
-   `kubectl label node cl190vqqqoksldfc3u8c-alif node-role.kubernetes.io/infra=infra`
-
-   `kubectl taint nodes cl190vqqqoksldfc3u8c-alif infra=true:NoSchedule`
-
-   `kubectl get node -o wide --show-labels` :
-
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e1374d55-0d26-48d9-8871-b8f6767d4790)
-
-   `kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints`
+2. Использовать будем кластер из предыдущего задания kubernetes-logging 
    
-![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/f87ee5b0-86ec-41d3-9842-c05d27969096)
-
-3. Немного отойдем от условий ДЗ и для экономии ресурсов будем использовать не яндекс S3 бакет, а инстанс S3 minio, который развернем на кластере, который использовали для выполнения предыдущих ДЗ.
-
-   - Через minio operator развернем tennant и создадим бакеты для loki:
-     
-     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e2d66468-0150-4eff-a671-dd464b0113bb)
-
-   - Создадим access key и access key id для доступа к бакетам:
-  
-     ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/fe6551c2-cc29-4e64-91b5-9628bfc45f1c)
-
- 4. Далее запулим чарт с локи и создадим кастомный values:
-
-    `helm pull grafana/loki`
-
-    В качестве схемы развертывания будем использовать монолитную, Single Binary. Устанавливаем:
-
-    `helm install loki --namespace=logging --values=loki/andrewloki.yaml loki/`
-
-    Убеждаемся, что наш инстанс развернулся и залетел только на ифнраструктурную ноду:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5e675954-ca67-436c-820d-616ce47a5d85)
-
-
-5. Пулим чарт промтейла grafana/promtail, настраиваем values для размещения на обоих нодах и устанавливаем:
+3. Пулим helm chart для argocd.
    
-    `helm install promtail --namespace=logging --values=values.yaml promtail/`
+   `helm repo add argo https://argoproj.github.io/argo-helm`
 
-  Убеждаемся, что promtail залетел на обе ноды:
+   `helm update https://argoproj.github.io/argo-helm`
 
-  ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/a15bf206-4167-4a28-9d8f-b376920b1be4)
+   `helm pull argo/argo-cd`
 
-6. Создаем кастомный values.yaml для графаны и ставим из helm чарта вместе с prometheus stack:
-
-   `helm install grafana --namespace=logging --values=grafana/values.yaml prometheus-community/kube-prometheus-stack`
-
-   Убеждаемся, что все залетело на infra ноду:
+4. Создаем кастомный манифест myvalues.yaml и настраиваем согласно условиям ДЗ (node labels, tolerations).
    
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/94d4eb1e-8ab1-4db9-bf9d-9b45e5bfd91f)
+5. Разворачиваем argocd с нашим myvalues.yaml и проверяем, что все запустилось на нужной ноде.
+
+   `helm install argocd --namespace=argocd --values=myvalues.yaml argo-cd/`
+   
+  ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5dda6ce5-4d0c-4e3a-ae57-e557ad9f2578)
 
 
-7. Авторизируемся в графану и добавляем loki gateway:
+6. Создаем ingress и подключаемся к argocd.
 
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/1f8aca9d-1212-473e-89f9-ffe8100273fd)
+   `kubectl apply -f argoingress.yaml`
 
-8. Убеждаемся, что loki как data source работает и отдает метрики кластера, которые ему предоставил promtail.
+   Получаем пароль для авторизации:
+   
+   `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
 
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/6918d0ab-58eb-4c7a-bd9d-271d0920a43d)
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/02f9e1a3-5015-456f-a76f-9b83bdc880bb)
 
-9. Так же убеждаемся, что Loki успешно подключился к нашему S3 хранилищу.
-    
- ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/26454fbc-6a8d-4743-913b-0575c939dcf5)
+
+7.  Подключаем наш репозиторий через ssh:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/3cfcc092-71b3-426d-a04f-0ef177b25d14)
+
+8. Устанавливаем argocd cli и подключаемся к серверу argoCD.
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5753714b-067d-44ee-ba12-2f208e3db408)
+
+   `argocd login argocd.ustinovich.online`
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d3a89280-882b-47d6-a7f0-899ca099c6b7)
+
+9. Запускаем манифест для создания проекта otus в argoCD.
+
+    `kubectl apply -f project.yaml`
+
+   
+10. Создаем манифест app.yaml для приложения из ветки kubernetes-networks нашего репозитория и запускаем.
+
+    `argocd app create -f app.yaml app`
+
+    Приложение создалось:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/c95dfcaf-5aa4-4ed9-954d-1db3b299a86b)
+
+
+11. Запустим синхронизацию с репозиторием и увидим, что наше приложение успешно запустилось с помощью argocd в нужной нам конфигурации и успешно функционирует:
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/cb299677-55cf-42a0-9d57-333511e0da83)
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/47fe0c3b-6420-476d-8c14-794d5530c4a9)
+
+    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5c7f4e5c-e66e-4c70-890b-33ec475f94dd)
+
+
+12. Создаем манифест apphelm.yaml для запуска приложения из репозитория kubernetes-templating и настраиваем согласно условиям ДЗ, запускаем:
+
+    `argocd app create -f apphelm.yaml apphelm`
+
+   Приложение создалось и автоматически синхронизировалось:
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/1ae7b490-acaf-4992-bc93-31a8eda6e9db)
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e76952da-15cf-47c4-bba1-bd157cb93455)
+
+   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d37c126d-466b-4570-b74a-08e534528424)
 
 
 
