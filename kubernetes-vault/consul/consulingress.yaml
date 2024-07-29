@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: consul-ui-ingress
+  namespace: consul
+  annotations:
+    cert-manager.io/cluster-issuer: andrew-clusterissuer
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    # If you encounter a redirect loop or are getting a 307 response code
+    # then you need to force the nginx ingress to connect to the backend using HTTPS.
+    #
+    #nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: consul.ustinovich.online
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: consul-ui
+            port:
+              name: http
+  tls:
+  - hosts:
+    - consul.ustinovich.online
+    secretName: consul-server-tls # as expected by argocd-server
