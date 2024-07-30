@@ -1,85 +1,55 @@
 
-# Репозиторий для выполнения ДЗ №10
-1. Клонируем репозиторий kubernetes-logging в новую ветку kubernetes-gitops
+# Репозиторий для выполнения ДЗ №12
 
-2. Использовать будем кластер из предыдущего задания kubernetes-logging 
+1. Клонируем репозиторий kubernetes-vault в новую ветку kubernetes-csi
+
+2. Будем использовать yandex cluster из предыдущих дз.
    
-3. Пулим helm chart для argocd.
+3. Создаем бакет в yc
+
+   ![image](https://github.com/user-attachments/assets/54624f72-368b-49b8-8cb5-402bd3f453f2)
+
+4. Делаем для него serviceaccount с ключами:
+
+   ![image](https://github.com/user-attachments/assets/e0c47180-f896-4ae0-8592-03c8aac03555)
+ 
+5. Создаем манифест для доступа к бакету с ключами:
    
-   `helm repo add argo https://argoproj.github.io/argo-helm`
-
-   `helm update https://argoproj.github.io/argo-helm`
-
-   `helm pull argo/argo-cd`
-
-4. Создаем кастомный манифест myvalues.yaml и настраиваем согласно условиям ДЗ (node labels, tolerations).
+   `kubectl apply -f csisecret.yaml`
    
-5. Разворачиваем argocd с нашим myvalues.yaml и проверяем, что все запустилось на нужной ноде.
 
-   `helm install argocd --namespace=argocd --values=myvalues.yaml argo-cd/`
+
+6. StorageClass с указанием бакета:
    
-  ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5dda6ce5-4d0c-4e3a-ae57-e557ad9f2578)
+   `kubectl apply -f storageclass.yaml`
 
+7. Устанавливаем драйвер и provisioner:
 
-6. Создаем ingress и подключаемся к argocd.
+   `kubectl apply -f provisioner.yaml
+    kubectl apply -f driver.yaml
+    kubectl apply -f csi-s3.yaml`
 
-   `kubectl apply -f argoingress.yaml`
+8. Создаем PVC:
 
-   Получаем пароль для авторизации:
+   `kubectl apply -f pvc.yaml`
+
+   ![image](https://github.com/user-attachments/assets/2be79a4d-6594-474a-a640-da9485f7e760)
+
+9. Запускаем тестовый pod
+
+    `kubectl apply -f pod.yaml`
+
+  Проверяем, что данные появились в бакете:
+  
+   ![image](https://github.com/user-attachments/assets/1d252175-982e-42d8-b6f1-03bc409850fb)
+
+    
+
+    
    
-   `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
 
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/02f9e1a3-5015-456f-a76f-9b83bdc880bb)
-
-
-7.  Подключаем наш репозиторий через ssh:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/3cfcc092-71b3-426d-a04f-0ef177b25d14)
-
-8. Устанавливаем argocd cli и подключаемся к серверу argoCD.
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5753714b-067d-44ee-ba12-2f208e3db408)
-
-   `argocd login argocd.ustinovich.online`
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d3a89280-882b-47d6-a7f0-899ca099c6b7)
-
-9. Запускаем манифест для создания проекта otus в argoCD.
-
-    `kubectl apply -f project.yaml`
 
    
-10. Создаем манифест app.yaml для приложения из ветки kubernetes-networks нашего репозитория и запускаем.
-
-    `argocd app create -f app.yaml app`
-
-    Приложение создалось:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/c95dfcaf-5aa4-4ed9-954d-1db3b299a86b)
 
 
-11. Запустим синхронизацию с репозиторием и увидим, что наше приложение успешно запустилось с помощью argocd в нужной нам конфигурации и успешно функционирует:
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/cb299677-55cf-42a0-9d57-333511e0da83)
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/47fe0c3b-6420-476d-8c14-794d5530c4a9)
-
-    ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/5c7f4e5c-e66e-4c70-890b-33ec475f94dd)
-
-
-12. Создаем манифест apphelm.yaml для запуска приложения из репозитория kubernetes-templating и настраиваем согласно условиям ДЗ, запускаем:
-
-    `argocd app create -f apphelm.yaml apphelm`
-
-   Приложение создалось и автоматически синхронизировалось:
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/1ae7b490-acaf-4992-bc93-31a8eda6e9db)
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/e76952da-15cf-47c4-bba1-bd157cb93455)
-
-   ![image](https://github.com/Kuber-2024-04OTUS/hyperique_repo/assets/90676858/d37c126d-466b-4570-b74a-08e534528424)
-
-
-
-
-
+   
