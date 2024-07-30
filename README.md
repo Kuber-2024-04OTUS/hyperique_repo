@@ -1,5 +1,6 @@
 
 # Репозиторий для выполнения ДЗ №12
+
 1. Клонируем репозиторий kubernetes-vault в новую ветку kubernetes-csi
 
 2. Будем использовать yandex cluster из предыдущих дз.
@@ -39,9 +40,16 @@
     `kubectl apply -f pod.yaml`
 
   Проверяем, что данные появились в бакете:
+  
+   ![image](https://github.com/user-attachments/assets/1d252175-982e-42d8-b6f1-03bc409850fb)
 
-  ![image](https://github.com/user-attachments/assets/1d252175-982e-42d8-b6f1-03bc409850fb)
+    
+
+    
+   
 
 
+   
 
 
+   
