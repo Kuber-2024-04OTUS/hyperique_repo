@@ -1,4 +1,5 @@
 
+
 # Репозиторий для выполнения ДЗ №14
 
 1. Клонируем репозиторий kubernetes-debug в новую ветку kubernetes-prod
@@ -179,9 +180,3 @@ EOF" `
 
 ![image](https://github.com/user-attachments/assets/6e335156-eacd-4e27-896e-fe64c7b82baf)
 
-
-   
-
-
-   
-    
