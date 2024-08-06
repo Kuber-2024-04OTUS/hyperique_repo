@@ -11,6 +11,7 @@
 3. Для управления несколькими серверами установим утилиту pdsh:
 
    ` sudo apt install pdsh `
+   
    Создадим файл hosts:
    
     ![image](https://github.com/user-attachments/assets/ee146239-d7c5-4cdf-8557-50e6e7c43be9)
@@ -21,26 +22,39 @@
     pdsh -w ^hosts -R ssh "cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
-EOF" 
-    pdsh -w ^hosts -R ssh "sudo modprobe br_netfilter"
-    pdsh -w ^hosts -R ssh "sudo modprobe overlay"
-    pdsh -w ^hosts -R ssh "echo 'br_netfilter' | sudo tee -a /etc/modules-load.d/br_netfilter.conf"
-    pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables"
-    pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables"
-    pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/ipv4/ip_forward"
-    pdsh -w ^hosts -R ssh "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.conf.all.accept_redirects = 0' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.conf.all.send_redirects = 0' | sudo tee -a /etc/sysctl.conf && echo 'net.netfilter.nf_conntrack_max = 131072' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.tcp_syncookies = 1' | 
+EOF" `
+
+  `pdsh -w ^hosts -R ssh "sudo modprobe br_netfilter"`
+
+   ` pdsh -w ^hosts -R ssh "sudo modprobe overlay"`
+   
+   ` pdsh -w ^hosts -R ssh "echo 'br_netfilter' | sudo tee -a /etc/modules-load.d/br_netfilter.conf"`
+   
+   ` pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables"`
+   
+   ` pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables"`
+   
+   ` pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/ipv4/ip_forward"`
+   
+   ` pdsh -w ^hosts -R ssh "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.conf.all.accept_redirects = 0' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.conf.all.send_redirects = 0' | sudo tee -a /etc/sysctl.conf && echo 'net.netfilter.nf_conntrack_max = 131072' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.tcp_syncookies = 1' | 
     sudo tee -a /etc/sysctl.conf && sudo sysctl -p"`
     
    
-6. Установим kubeadm, kubelet, kubectl, containerd:
+7. Установим kubeadm, kubelet, kubectl, containerd:
 
-   ` pdsh -w ^hosts -R ssh "sudo apt-get install -y apt-transport-https ca-certificates curl gpg"
-     pdsh -w ^hosts -R ssh "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
-     pdsh -w ^hosts -R ssh "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list" #добавим репозиторий версии 1.29
-     pdsh -w ^hosts -R ssh "sudo apt-get update"
-     pdsh -w ^hosts -R ssh "sudo apt-get install -y kubelet kubeadm kubectl containerd" #установим пакеты
-     pdsh -w ^hosts -R ssh "sudo apt-mark hold kubelet kubeadm kubectl" #закрепим версию
-     pdsh -w ^hosts -R ssh "sudo systemctl enable --now kubelet"`
+   ` pdsh -w ^hosts -R ssh "sudo apt-get install -y apt-transport-https ca-certificates curl gpg"`
+   
+   ` pdsh -w ^hosts -R ssh "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"`
+   
+   ` pdsh -w ^hosts -R ssh "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list" #добавим репозиторий версии 1.29`
+   
+   ` pdsh -w ^hosts -R ssh "sudo apt-get update"`
+   
+   ` pdsh -w ^hosts -R ssh "sudo apt-get install -y kubelet kubeadm kubectl containerd" #установим пакеты`
+   
+   ` pdsh -w ^hosts -R ssh "sudo apt-mark hold kubelet kubeadm kubectl" #закрепим версию`
+   
+   ` pdsh -w ^hosts -R ssh "sudo systemctl enable --now kubelet"`
    
      Проинициализируем кластер:
 
@@ -68,22 +82,24 @@ EOF"
 
    ![image](https://github.com/user-attachments/assets/b600fcaa-b599-42dc-bdf5-7fcc9b03fff5)
 
-7. Подключаем остальные ноды:
+9. Подключаем остальные ноды:
 
    `pdsh -w ^hosts -R ssh kubeadm join 10.10.99.56:6443 --token 765lxg.decb0p91suvs4f71 \
         --discovery-token-ca-cert-hash sha256:0098ee50aa00c77937b03d4281380435bea4b37ee04a425897681979016c83bf`
+   
    Проверяем:
 
    ![image](https://github.com/user-attachments/assets/e6e43a74-09a4-452e-b654-21be088db00e)
 
    
-8. Обновим местер в кластере:
+11. Обновим местер в кластере:
 
    сменим репозиторий:
 
     `  "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /
        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ / | sudo tee /etc/apt/sources.list.d/kubernetes.list
        sudo apt-get update" `
+       
    Посмотрим на версии kubeadm в репозитории:
    
    `apt-cache madison kubeadm`
@@ -111,7 +127,7 @@ EOF"
 
    ![image](https://github.com/user-attachments/assets/71769932-841d-4c21-81b5-f5de30b888e6)
 
-9. Обновим worker ноды:
+11. Обновим worker ноды:
 
    
  
@@ -123,11 +139,11 @@ EOF"
     pdsh -w ^hosts -R ssh "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list"
     pdsh -w ^hosts -R ssh "sudo apt-get update"`
 
-    Снимем холд:
+   Снимем холд:
 
     ` pdsh -w ^hosts -R ssh "sudo apt-mark unhold kubeadm kubelet kubectl"`
    
-    Обновляем вторую ноду:
+   Обновляем вторую ноду:
     `kubectl drain k8s-ustinovich-2 --ignore-daemonsets --delete-emptydir-data`
     `ssh 10.10.99.57`
     `sudo apt-get install -y kubeadm=1.30.3-1.1`
@@ -135,7 +151,7 @@ EOF"
     `sudo apt-get install -y kubelet=1.30.3-1.1 kubectl=1.30.3-1.1`
     `kubectl uncordon k8s-ustinovich-2`
 
-    ![image](https://github.com/user-attachments/assets/9685cbeb-1886-4e18-8ddf-a42649d05c45)
+   ![image](https://github.com/user-attachments/assets/9685cbeb-1886-4e18-8ddf-a42649d05c45)
 
    По аналогии третью и четвертую:
    
