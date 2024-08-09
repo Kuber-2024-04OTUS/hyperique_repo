@@ -1,102 +1,182 @@
 
-# Репозиторий для выполнения ДЗ №13
 
-1. Клонируем репозиторий kubernetes-csi в новую ветку kubernetes-debug
+# Репозиторий для выполнения ДЗ №14
 
-2. Создадим манифест для развертывания пода, подключим через configmap nginx.conf для развернутого логирования:
+1. Клонируем репозиторий kubernetes-debug в новую ветку kubernetes-prod
 
-     `kubectl apply -f pod.yaml`
+2. В качестве серверов буду использовать виртуальные машины в своем окружении vmware:
 
-3. Создаем эфемерный контейнер для дебага пода:
+   ![image](https://github.com/user-attachments/assets/0c88008c-9efe-47d7-9287-477225dc7b80)
 
-     `kubectl debug -it nginx-distroless --image=busybox --target=nginx --share-processes`
 
-4. Для того, что бы получить доступ к файловой системе пода, нам нужно обратиться к временной файловой системе proc, в которой и будет лежать содержимое пода
+3. Для управления несколькими серверами установим утилиту pdsh:
+
+   ` sudo apt install pdsh `
    
-     `cd /proc/1/root/etc/nginx/`
-
-     `ls -la`
+   Создадим файл hosts:
    
-   ![image](https://github.com/user-attachments/assets/4ff596ae-682a-4b44-bdb0-370523a877c7)
+    ![image](https://github.com/user-attachments/assets/ee146239-d7c5-4cdf-8557-50e6e7c43be9)
 
-6. Запустим команду tcpdump:
-
-   `tcpdump -nn -i any -e port 80`
-
- ![image](https://github.com/user-attachments/assets/90ed3dd8-62a8-4734-8ac0-b95564e52083)
-
- Как видим, утилита не найдена - значит будем использовать другой image для kubectl debug:
-
-   `kubectl debug -it nginx-distroless -n homework --image=nicolaka/netshoot --target=nginx --share-processes`
-
-   `tcpdump -nn -i any -e port 80`
-
- ![image](https://github.com/user-attachments/assets/1afaaa5d-00f0-456f-a9a8-aeb69fa8de69)
-
- Обратимся через curl к нашему поду:
-
- ![image](https://github.com/user-attachments/assets/1c42d01c-4073-48ee-825c-6ae458a6f90c)
-
-    `curl 10.233.64.253`
-   
-Убеждаемся, что наши запросы отображаются: (файл tcpdump.log приложен к заданию)
-
- ![image](https://github.com/user-attachments/assets/43eee900-49b6-499a-a37d-56bca54175ab)
-
+5. Настроим сервера:
  
-6. С помощью kubectl debug запустим отладочный под для ноды, на которой расположен наш pod:
+   `pdsh -w ^hosts -R ssh "sudo swapoff -a"
+    pdsh -w ^hosts -R ssh "cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF" `
 
-   `kubectl debug node/node2-shb --image=busybox -ti`
+  `pdsh -w ^hosts -R ssh "sudo modprobe br_netfilter"`
 
-  Файловая система ноды будет располагаться по пути /host. Найдем путь к логам пода nginx-distroless
-  
-   `cd /host/var/log/containers`
+   ` pdsh -w ^hosts -R ssh "sudo modprobe overlay"`
+   
+   ` pdsh -w ^hosts -R ssh "echo 'br_netfilter' | sudo tee -a /etc/modules-load.d/br_netfilter.conf"`
+   
+   ` pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables"`
+   
+   ` pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables"`
+   
+   ` pdsh -w ^hosts -R ssh "echo '1' | sudo tee /proc/sys/net/ipv4/ip_forward"`
+   
+   ` pdsh -w ^hosts -R ssh "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.conf.all.accept_redirects = 0' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.conf.all.send_redirects = 0' | sudo tee -a /etc/sysctl.conf && echo 'net.netfilter.nf_conntrack_max = 131072' | sudo tee -a /etc/sysctl.conf && echo 'net.ipv4.tcp_syncookies = 1' | 
+    sudo tee -a /etc/sysctl.conf && sudo sysctl -p"`
+    
+   
+7. Установим kubeadm, kubelet, kubectl, containerd:
 
-   ![image](https://github.com/user-attachments/assets/5348fb51-9e25-48a7-ad44-5775b24a726d)
+   ` pdsh -w ^hosts -R ssh "sudo apt-get install -y apt-transport-https ca-certificates curl gpg"`
+   
+   ` pdsh -w ^hosts -R ssh "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"`
+   
+   ` pdsh -w ^hosts -R ssh "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list" #добавим репозиторий версии 1.29`
+   
+   ` pdsh -w ^hosts -R ssh "sudo apt-get update"`
+   
+   ` pdsh -w ^hosts -R ssh "sudo apt-get install -y kubelet kubeadm kubectl containerd" #установим пакеты`
+   
+   ` pdsh -w ^hosts -R ssh "sudo apt-mark hold kubelet kubeadm kubectl" #закрепим версию`
+   
+   ` pdsh -w ^hosts -R ssh "sudo systemctl enable --now kubelet"`
+   
+     Проинициализируем кластер:
 
-  Откроем файл логов distroless пода:
+    `  sudo kubeadm init --pod-network-cidr=10.244.0.0/16 `
 
-   `cat /host/var/log/pods/homework_nginx-distroless_a9d89b59-a327-469c-9f46-31b693d7e905/nginx/0.log`
+    ![image](https://github.com/user-attachments/assets/7630f6e3-da10-4e65-9e5b-ba3fa67e3bbb)
 
-  Как видим в логе отображаются запросы, которые мы ранее делали к web серверу через curl: (файл nginx.log приложен к дз)
+    добавим kubeconfig:
 
-  ![image](https://github.com/user-attachments/assets/ef949379-ac70-486c-b7eb-5304d99b7203)
+   `mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config`
 
-7. Задание со *
+   Проверим кластер:
 
-   Запустим эфемерный под:
+   ![image](https://github.com/user-attachments/assets/566303c8-4d17-4a8f-bd48-72333819fb1e)
 
-    `kubectl debug -it nginx-distroless -n homework --image=nicolaka/netshoot --target=nginx --share-processes`
+   Установим flannel:
 
-   Найдем корневой процесс nginx:
+   `kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml`
 
-    `ps aux | grep nginx`
+   Убеждаемися, что все поднялось:
 
-   ![image](https://github.com/user-attachments/assets/62e99520-8f33-4947-aff5-23f3746a2ef6)
+   ![image](https://github.com/user-attachments/assets/c29a9d92-e4aa-4de2-8f95-0dfb8eaf3d3f)
 
-   И попробуем выполнить strace:
+   ![image](https://github.com/user-attachments/assets/b600fcaa-b599-42dc-bdf5-7fcc9b03fff5)
 
-    `strace -p 1`
+9. Подключаем остальные ноды:
 
-   ![image](https://github.com/user-attachments/assets/675618ad-b169-4c3d-afd9-f0755a01607e)
+   `pdsh -w ^hosts -R ssh kubeadm join 10.10.99.56:6443 --token 765lxg.decb0p91suvs4f71 \
+        --discovery-token-ca-cert-hash sha256:0098ee50aa00c77937b03d4281380435bea4b37ee04a425897681979016c83bf`
+   
+   Проверяем:
 
-   Как видим у нас нет прав для запуска этой команды. Это связано с securitycontext подов, даже эфемерный контейнер не имеет возможности интегрироваться в системные вызовы. Для того, что бы исправить эту ситуацию поду должен быть передан securitycontext SYS_PTRACE.
-   Сделать это можно следующим образом:
-   На github есть enhancement для kubectl из которого можно увидеть, что для kubectl debug существует система профилей, позволяющих менять securitycontext в зависимости от задач дебага (https://github.com/kubernetes/enhancements/tree/master/keps/sig-cli/1441-kubectl-debug#debugging-profiles), для дебага на уровне системных прерываний мы можем использовать профиль     general, который устанавливает переменную SYS_PTRACE:
-   ![image](https://github.com/user-attachments/assets/10dab845-b321-4837-81d1-434cbeb4cfb3)
-
-
-   Запустим и проверим:
-
-    `kubectl debug -it nginx-distroless -n homework --image=nicolaka/netshoot --target=nginx --share-processes --profile=general`
-
-   ![image](https://github.com/user-attachments/assets/9a2eb0e9-49b8-4f9d-a685-a23ae00b74f1)
-
-   Как видим процесс приаттачился, задание выполнено.
+   ![image](https://github.com/user-attachments/assets/e6e43a74-09a4-452e-b654-21be088db00e)
 
    
+11. Обновим местер в кластере:
 
+   сменим репозиторий:
+
+    `  "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /
+       echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ / | sudo tee /etc/apt/sources.list.d/kubernetes.list
+       sudo apt-get update" `
+       
+   Посмотрим на версии kubeadm в репозитории:
+   
+   `apt-cache madison kubeadm`
+   
+   ![image](https://github.com/user-attachments/assets/1f309c35-6b58-4bbb-9024-da498ab8e5b4)
+
+   Снимем пакеты с холда:
+
+   `sudo apt-mark unhold kubeadm kubelet kubectl`
+
+   И установим kubeadm последней версии:
+
+   ` sudo apt-get install -y kubeadm=1.30.3-1.1`
+
+   ` kubeadm version`
+
+   ![image](https://github.com/user-attachments/assets/4e7aed10-b740-41ff-ba70-ff10573e8486)
+
+
+   Аналогично обновимм kubelet и kubectl:
+
+   `sudo apt-get install -y kubelet=1.30.3-1.1  kubectl=1.30.3-1.1`
+
+   ![image](https://github.com/user-attachments/assets/da1e7dc3-3a02-424f-abdf-a2d4bd7e9186)
+
+   ![image](https://github.com/user-attachments/assets/71769932-841d-4c21-81b5-f5de30b888e6)
+
+11. Обновим worker ноды:
+
+   
  
-  
+   ![image](https://github.com/user-attachments/assets/29f0a14e-32d5-4695-9189-4f9122c1fd88)
 
-  
+    Обновим репозитории на нодах:
+
+   `pdsh -w ^hosts -R ssh "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+    pdsh -w ^hosts -R ssh "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list"
+    pdsh -w ^hosts -R ssh "sudo apt-get update"`
+
+   Снимем холд:
+
+    ` pdsh -w ^hosts -R ssh "sudo apt-mark unhold kubeadm kubelet kubectl"`
+   
+   Обновляем вторую ноду:
+    `kubectl drain k8s-ustinovich-2 --ignore-daemonsets --delete-emptydir-data`
+    `ssh 10.10.99.57`
+    `sudo apt-get install -y kubeadm=1.30.3-1.1`
+    `sudo kubeadm upgrade node`
+    `sudo apt-get install -y kubelet=1.30.3-1.1 kubectl=1.30.3-1.1`
+    `kubectl uncordon k8s-ustinovich-2`
+
+   ![image](https://github.com/user-attachments/assets/9685cbeb-1886-4e18-8ddf-a42649d05c45)
+
+   По аналогии третью и четвертую:
+   
+    `kubectl drain k8s-ustinovich-3 --ignore-daemonsets --delete-emptydir-data`
+    `ssh 10.10.99.58`
+    `sudo apt-get install -y kubeadm=1.30.3-1.1`
+    `sudo kubeadm upgrade node`
+    `sudo apt-get install -y kubelet=1.30.3-1.1 kubectl=1.30.3-1.1`
+    `kubectl uncordon k8s-ustinovich-3`
+   
+    `kubectl drain k8s-ustinovich-4 --ignore-daemonsets --delete-emptydir-data`
+    `ssh 10.10.99.59`
+    `sudo apt-get install -y kubeadm=1.30.3-1.1`
+    `sudo kubeadm upgrade node`
+    `sudo apt-get install -y kubelet=1.30.3-1.1 kubectl=1.30.3-1.1`
+    `kubectl uncordon k8s-ustinovich-4`
+
+   ![image](https://github.com/user-attachments/assets/10150cb0-5833-4ef5-bffe-0791e3b3a6be)
+
+Задание выполнено успешно.
+
+Задание со *.
+
+Ранее для Дз и в рамках эксперимента я уже поднимал рабочий кластер через kubespray, прилагаю файл конфигурации развертывания через ansible (hosts.yaml), а так же вывод команды kubectl get nodes -o wide моего распределенного кластера:
+
+![image](https://github.com/user-attachments/assets/6e335156-eacd-4e27-896e-fe64c7b82baf)
+
